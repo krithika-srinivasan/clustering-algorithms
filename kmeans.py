@@ -36,6 +36,7 @@ class KMeans:
         self.max_iterations = max_iterations
         self.classes = collections.defaultdict(list)
         self.centroids = []
+        self._points = None
 
     def l2_distance(self, x, y):
         if len(x) != len(y):
@@ -50,6 +51,7 @@ class KMeans:
         Fits data points using the KMeans method.
         Returns optimal centroids.
         """
+        self._points = x
         self.centroids = [None] * self.num_clusters
         # Select first `num_clusters` data points as initial centroids
         for idx in range(self.num_clusters):
@@ -95,14 +97,25 @@ class KMeans:
         klass = distances.index(min(distances))
         return klass
 
+    def score(self, truth_clusters):
+        if not self.centroids or not len(self.classes):
+            raise ValueError("No data has been fit yet!")
+        accurate = 0
+        for idx, truth in enumerate(truth_clusters):
+            if self._points[idx] in self.classes[truth]:
+                accurate += 1
+        return (accurate / len(self._points))
+
 def main():
     args = setup_argparser().parse_args()
     filepath = args.file
     data, truth_clusters = import_file(filepath)
     num_clusters = len(set(truth_clusters))
     logging.info("{}, {}, {}".format(num_clusters, min(truth_clusters), max(truth_clusters)))
-    kmeans = KMeans(num_clusters=num_clusters, tolerance=0.0001, max_iterations=1000)
+    kmeans = KMeans(num_clusters=num_clusters, tolerance=0.00001, max_iterations=1000)
     centroids = kmeans.fit(data)
+    score = kmeans.score(truth_clusters)
+    logging.info("Score: {}".format(score))
     logging.info(centroids)
     return
 
