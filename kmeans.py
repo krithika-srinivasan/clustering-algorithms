@@ -2,9 +2,32 @@ import logging
 import math
 import collections
 import numpy as np
+from argparse import ArgumentParser
+from tqdm import tqdm
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
+
+def setup_argparser():
+    parser = ArgumentParser()
+    parser.add_argument("--file", help="File to read data from. Format of the file should be as follows: <index> <ground truth cluster> <point 1> <point 2> ... <point n>", type=str)
+    return parser
+
+def import_file(path):
+    truth_clusters, data = [], []
+    with open(path, "r") as f:
+        for line in f.readlines():
+            line = line.strip()
+            if not line:
+                continue
+            idx, truth_cluster, *points = line.split()
+            truth_clusters.append(int(truth_cluster))
+            data.append([float(x) for x in points])
+    # We have zero-indexed clusters.
+    # So we need to make sure that imported data is also zero-indexed
+    if min(truth_clusters) > 0:
+        truth_clusters = np.subtract(truth_clusters, min(truth_clusters))
+    return data, truth_clusters
 
 class KMeans:
     def __init__(self, num_clusters=3, tolerance=0.0001, max_iterations=1000):
@@ -33,7 +56,7 @@ class KMeans:
         for idx in range(self.num_clusters):
             self.centroids[idx] = x[idx]
 
-        for epoch in range(self.max_iterations):
+        for epoch in tqdm(range(self.max_iterations)):
             is_optimal = False
 
             self.classes = collections.defaultdict(list)
@@ -41,7 +64,7 @@ class KMeans:
             # Assign all points to classes
             for point in x:
                 # Compute distances to all centroids
-                distances = [np.linalg.norm(point - centroid) for centroid in self.centroids]
+                distances = [np.linalg.norm(self.distance(point, centroid)) for centroid in self.centroids]
                 # Assign to class that is closest
                 assigned_class = distances.index(min(distances))
                 self.classes[assigned_class].append(point)
@@ -63,10 +86,14 @@ class KMeans:
         return self.centroids
 
 def main():
-    kmeans = KMeans(num_clusters=3, tolerance=0.0001, max_iterations=1000)
-    x = np.random.randn(10, 4)
-    centroids = kmeans.fit(x)
-    logging.info(x)
+    args = setup_argparser().parse_args()
+    filepath = args.file
+    data, truth_clusters = import_file(filepath)
+    num_clusters = len(set(truth_clusters))
+    logging.info(data)
+    logging.info("{}, {}, {}".format(num_clusters, min(truth_clusters), max(truth_clusters)))
+    kmeans = KMeans(num_clusters=num_clusters, tolerance=0.0001, max_iterations=1000)
+    centroids = kmeans.fit(data)
     logging.info(centroids)
     return
 
