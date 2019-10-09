@@ -1,5 +1,6 @@
 import logging
 import math
+import random
 import collections
 import numpy as np
 from argparse import ArgumentParser
@@ -11,6 +12,9 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='
 def setup_argparser():
     parser = ArgumentParser()
     parser.add_argument("--file", help="File to read data from. Format of the file should be as follows: <index> <ground truth cluster> <point 1> <point 2> ... <point n>", type=str)
+    parser.add_argument("--random-start", help="Pick cluster centroids at random", action="store_true", default=False)
+    parser.add_argument("--tolerance", help="Tolerance for centroid shifts", type=float, default=0.0001)
+    parser.add_argument("--num-iterations", help="Max iterations to run the KMeans algorithm for", type=int, default=1000)
     return parser
 
 def import_file(path):
@@ -46,16 +50,21 @@ class KMeans:
             dist += (x[idx] - y[idx]) ** 2
         return math.sqrt(dist)
 
-    def fit(self, x):
+    def fit(self, x, random_start=False):
         """
         Fits data points using the KMeans method.
         Returns optimal centroids.
         """
         self._points = x
         self.centroids = [None] * self.num_clusters
-        # Select first `num_clusters` data points as initial centroids
-        for idx in range(self.num_clusters):
-            self.centroids[idx] = x[idx]
+        if random_start:
+            # Select random centroids
+            choices = random.sample(x, self.num_clusters)
+            self.centroids = choices
+        else:
+            # Select first `num_clusters` data points as initial centroids
+            for idx in range(self.num_clusters):
+                self.centroids[idx] = x[idx]
 
         for epoch in range(self.max_iterations):
             logging.info("Epoch {}".format(epoch))
@@ -109,12 +118,19 @@ class KMeans:
 def main():
     args = setup_argparser().parse_args()
     filepath = args.file
+    random_start = args.random_start
+    max_iterations = args.num_iterations
+    tolerance = args.tolerance
+
+    logging.info(args)
+
     data, truth_clusters = import_file(filepath)
     num_clusters = len(set(truth_clusters))
-    logging.info("{}, {}, {}".format(num_clusters, min(truth_clusters), max(truth_clusters)))
-    kmeans = KMeans(num_clusters=num_clusters, tolerance=0.00001, max_iterations=1000)
-    centroids = kmeans.fit(data)
+
+    kmeans = KMeans(num_clusters=num_clusters, tolerance=tolerance, max_iterations=max_iterations)
+    centroids = kmeans.fit(data, random_start=random_start)
     score = kmeans.score(truth_clusters)
+
     logging.info("Score: {}".format(score))
     logging.info(centroids)
     return
