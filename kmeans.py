@@ -63,12 +63,9 @@ class KMeans:
 
             # Assign all points to classes
             for point in x:
-                # Compute distances to all centroids
-                distances = [np.linalg.norm(self.l2_distance(point, centroid)) for centroid in self.centroids]
                 # TODO: Figure out how to take care of outlier case
-                # Assign to class that is closest
-                assigned_class = distances.index(min(distances))
-                self.classes[assigned_class].append(point)
+                klass = self.predict(point)
+                self.classes[klass].append(point)
 
             # Store current centroids
             old_centroids = [c for c in self.centroids]
@@ -88,6 +85,15 @@ class KMeans:
                 break
 
         return self.centroids
+
+    def predict(self, point):
+        if not self.centroids:
+            raise ValueError("No data has been fit yet!")
+        # Compute distances to all centroids
+        distances = [np.linalg.norm(self.l2_distance(point, centroid)) for centroid in self.centroids]
+        # Assign to class that is closest
+        klass = distances.index(min(distances))
+        return klass
 
 def main():
     args = setup_argparser().parse_args()
