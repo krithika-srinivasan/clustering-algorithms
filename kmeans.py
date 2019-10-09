@@ -37,7 +37,7 @@ class KMeans:
         self.classes = collections.defaultdict(list)
         self.centroids = []
 
-    def distance(self, x, y):
+    def l2_distance(self, x, y):
         if len(x) != len(y):
             raise ValueError("Dimensions of x {} and y {} are not the same".format(len(x), len(y)))
         dist = 0.0
@@ -50,27 +50,28 @@ class KMeans:
         Fits data points using the KMeans method.
         Returns optimal centroids.
         """
-
         self.centroids = [None] * self.num_clusters
         # Select first `num_clusters` data points as initial centroids
         for idx in range(self.num_clusters):
             self.centroids[idx] = x[idx]
 
-        for epoch in tqdm(range(self.max_iterations)):
-            is_optimal = False
+        for epoch in range(self.max_iterations):
+            logging.info("Epoch {}".format(epoch))
+            is_optimal = [False] * self.num_clusters
 
             self.classes = collections.defaultdict(list)
 
             # Assign all points to classes
             for point in x:
                 # Compute distances to all centroids
-                distances = [np.linalg.norm(self.distance(point, centroid)) for centroid in self.centroids]
+                distances = [np.linalg.norm(self.l2_distance(point, centroid)) for centroid in self.centroids]
+                # TODO: Figure out how to take care of outlier case
                 # Assign to class that is closest
                 assigned_class = distances.index(min(distances))
                 self.classes[assigned_class].append(point)
 
             # Store current centroids
-            old_centroids = self.centroids
+            old_centroids = [c for c in self.centroids]
 
             # Compute new centroids
             for klass, assigned_points in self.classes.items():
@@ -78,10 +79,13 @@ class KMeans:
 
             for klass, current_centroid in enumerate(self.centroids):
                 original_centroid = old_centroids[klass]
-                if np.sum((current_centroid - original_centroid) / current_centroid * 100.0) <= self.tolerance:
-                    is_optimal = True
-                if is_optimal:
-                    break
+                shift = self.l2_distance(current_centroid, original_centroid)
+                if shift <= self.tolerance:
+                    is_optimal[klass] = True
+
+            if all(is_optimal) == True:
+                logging.info("Optimal centroids found")
+                break
 
         return self.centroids
 
@@ -90,7 +94,6 @@ def main():
     filepath = args.file
     data, truth_clusters = import_file(filepath)
     num_clusters = len(set(truth_clusters))
-    logging.info(data)
     logging.info("{}, {}, {}".format(num_clusters, min(truth_clusters), max(truth_clusters)))
     kmeans = KMeans(num_clusters=num_clusters, tolerance=0.0001, max_iterations=1000)
     centroids = kmeans.fit(data)
