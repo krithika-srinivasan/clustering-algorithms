@@ -4,7 +4,6 @@ import random
 import collections
 import numpy as np
 from argparse import ArgumentParser
-from tqdm import tqdm
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -33,16 +32,29 @@ def import_file(path):
         truth_clusters = np.subtract(truth_clusters, min(truth_clusters))
     return data, truth_clusters
 
+def accuracy_score(predictions, actual):
+    if len(predictions) != len(actual):
+        raise ValueError("Dimensions of predictions and actual data are not the same")
+    count = 0
+    for idx, pred in enumerate(predictions):
+        if pred == actual[idx]:
+            count += 1
+    return count / len(actual)
+
 class KMeans:
-    def __init__(self, num_clusters=3, tolerance=0.0001, max_iterations=1000):
+    def __init__(self, num_clusters=3, tolerance=1e-4, max_iterations=1000):
         self.num_clusters = num_clusters
         self.tolerance = tolerance
         self.max_iterations = max_iterations
         self.classes = collections.defaultdict(list)
         self.centroids = []
         self._points = None
+        self.labels = []
 
     def l2_distance(self, x, y):
+        """
+        Euclidean distance b/w two points.
+        """
         if len(x) != len(y):
             raise ValueError("Dimensions of x {} and y {} are not the same".format(len(x), len(y)))
         dist = 0.0
@@ -67,16 +79,16 @@ class KMeans:
                 self.centroids[idx] = x[idx]
 
         for epoch in range(self.max_iterations):
-            logging.info("Epoch {}".format(epoch))
-            is_optimal = [False] * self.num_clusters
-
+            # Reset class/cluster/label assignments
             self.classes = collections.defaultdict(list)
+            self.labels = []
 
             # Assign all points to classes
             for point in x:
                 # TODO: Figure out how to take care of outlier case
                 klass = self.predict(point)
                 self.classes[klass].append(point)
+                self.labels.append(klass)
 
             # Store current centroids
             old_centroids = [c for c in self.centroids]
@@ -85,14 +97,17 @@ class KMeans:
             for klass, assigned_points in self.classes.items():
                 self.centroids[klass] = np.mean(assigned_points, axis=0)
 
+            is_optimal = [False] * self.num_clusters
+            # Measure the shift between the old and new centroids
             for klass, current_centroid in enumerate(self.centroids):
                 original_centroid = old_centroids[klass]
                 shift = self.l2_distance(current_centroid, original_centroid)
                 if shift <= self.tolerance:
                     is_optimal[klass] = True
 
+            # If none of the centroids have moved within tolerance - done optimizing
             if all(is_optimal) == True:
-                logging.info("Optimal centroids found")
+                logging.info("Optimal centroids found at Epoch {}".format(epoch))
                 break
 
         return self.centroids
@@ -109,11 +124,7 @@ class KMeans:
     def score(self, truth_clusters):
         if not self.centroids or not len(self.classes):
             raise ValueError("No data has been fit yet!")
-        accurate = 0
-        for idx, truth in enumerate(truth_clusters):
-            if self._points[idx] in self.classes[truth]:
-                accurate += 1
-        return (accurate / len(self._points))
+        return accuracy_score(self.labels, truth_clusters)
 
 def main():
     args = setup_argparser().parse_args()
