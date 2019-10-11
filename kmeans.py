@@ -4,7 +4,7 @@ import random
 import collections
 import numpy as np
 from argparse import ArgumentParser
-from util import rand_score, jaccard_coeff, reduce_dimensionality, plot
+from util import import_file, rand_score, jaccard_coeff, reduce_dimensionality, plot
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -16,22 +16,6 @@ def setup_argparser():
     parser.add_argument("--tolerance", help="Tolerance for centroid shifts", type=float, default=0.0001)
     parser.add_argument("--num-iterations", help="Max iterations to run the KMeans algorithm for", type=int, default=1000)
     return parser
-
-def import_file(path):
-    truth_clusters, data = [], []
-    with open(path, "r") as f:
-        for line in f.readlines():
-            line = line.strip()
-            if not line:
-                continue
-            idx, truth_cluster, *points = line.split()
-            truth_clusters.append(int(truth_cluster))
-            data.append([float(x) for x in points])
-    # We have zero-indexed clusters.
-    # So we need to make sure that imported data is also zero-indexed
-    if min(truth_clusters) > 0:
-        truth_clusters = np.subtract(truth_clusters, min(truth_clusters))
-    return data, truth_clusters
 
 def accuracy_score(predictions, actual):
     if len(predictions) != len(actual):
