@@ -4,7 +4,7 @@ import random
 import collections
 import numpy as np
 from argparse import ArgumentParser
-from util import rand_score, jaccard_coeff
+from util import rand_score, jaccard_coeff, reduce_dimensionality, plot
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -147,6 +147,9 @@ def main():
     logging.info("Accuracy Score: {}".format(score))
     logging.info("Rand Index: {}".format(rand_score(truth_clusters, kmeans.labels)))
     logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, kmeans.labels)))
+
+    # We apply PCA dim reduction to both data, and centroids to be able to plot them
+    plot(reduce_dimensionality(data), kmeans.labels, reduce_dimensionality(centroids), suffix="kmeans")
     return
 
 if __name__ == "__main__":
