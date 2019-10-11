@@ -4,6 +4,7 @@ import random
 import collections
 import numpy as np
 from argparse import ArgumentParser
+from util import rand_score, jaccard_coeff
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -142,8 +143,10 @@ def main():
     centroids = kmeans.fit(data, random_start=random_start)
     score = kmeans.score(truth_clusters)
 
-    logging.info("Score: {}".format(score))
-    logging.info(centroids)
+    logging.info("Centroids: {}".format(centroids))
+    logging.info("Accuracy Score: {}".format(score))
+    logging.info("Rand Index: {}".format(rand_score(truth_clusters, kmeans.labels)))
+    logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, kmeans.labels)))
     return
 
 if __name__ == "__main__":
