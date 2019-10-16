@@ -1,6 +1,7 @@
 import math
 import logging
 import numpy as np
+from sklearn.cluster import DBSCAN
 from argparse import ArgumentParser
 from util import import_file, rand_score, jaccard_coeff, reduce_dimensionality, plot
 
@@ -79,7 +80,11 @@ def main():
     logging.info("Rand index: {}".format(rand_score(truth_clusters, labels)))
     logging.info("Jaccard coeff: {}".format(jaccard_coeff(truth_clusters, labels)))
 
-    plot(reduce_dimensionality(data), labels, None, suffix="dbscan")
+    skdb = DBSCAN(eps=tolerance, min_samples=min_pts).fit(data)
+    print(skdb.labels_)
+    print(labels)
+
+    # plot(reduce_dimensionality(data), labels, None, suffix="dbscan")
     return
 
 if __name__ == "__main__":
