@@ -26,9 +26,8 @@ def jaccard_coeff(labels_true, labels_pred):
     # Average is set to "weighted" here to take into label imbalance
     return jaccard_score(labels_true, labels_pred, average="weighted")
 
-def plot(x, labels, centroids, suffix=None):
+def plot(x, labels, centroids=None, suffix=None):
     x = np.asarray(x)
-    centroids = np.asarray(centroids)
     uniq_labels = sorted(set(labels))
     fig = plt.figure(figsize=(15, 10))
     ax = fig.add_subplot(1, 1, 1)
@@ -36,7 +35,9 @@ def plot(x, labels, centroids, suffix=None):
         indexes = [idx for idx, l in enumerate(labels) if l == label]
         ax.scatter(x[indexes, 0], x[indexes, 1], label=label)
     # Plot the centroids
-    ax.scatter(centroids[:, 0], centroids[:, 1], marker="X")
+    if centroids is not None:
+        centroids = np.asarray(centroids)
+        ax.scatter(centroids[:, 0], centroids[:, 1], marker="X")
     plt.title("Clustering results")
     plt.legend()
     if suffix:

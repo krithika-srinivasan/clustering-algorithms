@@ -1,3 +1,4 @@
+import math
 import logging
 import numpy as np
 from argparse import ArgumentParser
@@ -14,14 +15,24 @@ def setup_argparser():
     return parser
 
 class Marker:
-    New = "New"
-    Visited = "Visited"
-    Noise = "Noise"
+    Unvisited = 0
+    Noise = -1
+
+def l2_distance(x, y):
+    """
+    Euclidean distance b/w two points.
+    """
+    if len(x) != len(y):
+        raise ValueError("Dimensions of x {} and y {} are not the same".format(len(x), len(y)))
+    dist = 0.0
+    for idx in range(len(x)):
+        dist += (x[idx] - y[idx]) ** 2
+    return math.sqrt(dist)
 
 def query_region(data, point, eps):
     neighbours = []
     for pn in range(0, len(data)):
-        if np.linalg.norm(data[point] - data[pn]) < eps:
+        if np.linalg.norm(l2_distance(data[point], data[pn])) < eps:
             neighbours.append(pn)
     return neighbours
 
@@ -32,7 +43,7 @@ def expand_cluster(data, labels, point, neighbours, cluster_label, min_pts, eps)
         pn = neighbours[idx]
         if labels[pn] == Marker.Noise:
             labels[pn] = cluster_label
-        elif labels[pn] == Marker.New:
+        elif labels[pn] == Marker.Unvisited:
             labels[pn] = cluster_label
             pn_neighbours = query_region(data, pn, eps)
             if len(pn_neighbours) >= min_pts:
@@ -41,17 +52,17 @@ def expand_cluster(data, labels, point, neighbours, cluster_label, min_pts, eps)
     return
 
 def dbscan(data, min_pts, eps):
-    labels = [Marker.New] * len(data)
+    labels = [Marker.Unvisited] * len(data)
     curr_cluster_idx = 0
-    for point in range(0, len(data)):
-        if labels[point] != Marker.New:
+    for idx, point in enumerate(data):
+        if labels[idx] != Marker.Unvisited:
             continue
-        neighbours = query_region(data, point, eps)
+        neighbours = query_region(data, idx, eps)
         if len(neighbours) < min_pts:
-            labels[point] = Marker.Noise
+            labels[idx] = Marker.Noise
         else:
             curr_cluster_idx += 1
-            expand_cluster(data, labels, point, neighbours, curr_cluster_idx, eps, min_pts)
+            expand_cluster(data, labels, idx, neighbours, curr_cluster_idx, eps, min_pts)
     return labels
 
 def main():
@@ -62,14 +73,13 @@ def main():
 
     logging.info(args)
 
-    data, truth_clusters = import_file(filepath)
-    num_clusters = len(set(truth_clusters))
+    data, truth_clusters = import_file(filepath, correct_clusters=False)
 
-    points = np.random.rand(10) * 10
-    print(points)
-    labels = dbscan(points, min_pts, tolerance)
-    print(labels)
+    labels = dbscan(data, min_pts, tolerance)
+    logging.info("Rand index: {}".format(rand_score(truth_clusters, labels)))
+    logging.info("Jaccard coeff: {}".format(jaccard_coeff(truth_clusters, labels)))
 
+    plot(reduce_dimensionality(data), labels, None, suffix="dbscan")
     return
 
 if __name__ == "__main__":
