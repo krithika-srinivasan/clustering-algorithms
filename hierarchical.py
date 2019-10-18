@@ -3,7 +3,7 @@ import math
 import collections
 import logging
 from argparse import ArgumentParser
-from util import import_file, plot, reduce_dimensionality
+from util import import_file, plot, reduce_dimensionality, rand_score, jaccard_coeff
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -176,6 +176,8 @@ def main():
     aggclustering = AgglomerativeClustering(num_clusters=num_clusters)
     labels = aggclustering.fit(points)
     logging.info("Labels: {}".format(labels))
+    logging.info("Rand score: {}".format(rand_score(truth_clusters, labels)))
+    logging.info("Jaccard coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
     plot(reduce_dimensionality(data), labels, None, suffix="hierarchical")
     return
