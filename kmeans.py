@@ -12,6 +12,7 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='
 def setup_argparser():
     parser = ArgumentParser()
     parser.add_argument("--file", help="File to read data from. Format of the file should be as follows: <index> <ground truth cluster> <point 1> <point 2> ... <point n>", type=str)
+    parser.add_argument("--num-clusters", help="Number of clusters for KMeans", type=int, default=3)
     parser.add_argument("--random-start", help="Pick cluster centroids at random", action="store_true", default=False)
     parser.add_argument("--tolerance", help="Tolerance for centroid shifts", type=float, default=0.0001)
     parser.add_argument("--num-iterations", help="Max iterations to run the KMeans algorithm for", type=int, default=1000)
@@ -114,6 +115,7 @@ class KMeans:
 def main():
     args = setup_argparser().parse_args()
     filepath = args.file
+    num_clusters = args.num_clusters
     random_start = args.random_start
     max_iterations = args.num_iterations
     tolerance = args.tolerance
@@ -121,7 +123,7 @@ def main():
     logging.info(args)
 
     data, truth_clusters = import_file(filepath)
-    num_clusters = len(set(truth_clusters))
+    # num_clusters = len(set(truth_clusters))
 
     kmeans = KMeans(num_clusters=num_clusters, tolerance=tolerance, max_iterations=max_iterations)
     centroids = kmeans.fit(data, random_start=random_start)
