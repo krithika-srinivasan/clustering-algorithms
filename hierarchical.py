@@ -3,10 +3,12 @@ import math
 import collections
 import logging
 from argparse import ArgumentParser
-from util import import_file
+from util import import_file, plot, reduce_dimensionality
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%d/%m/%Y %I:%M:%S %p',
                     level=logging.INFO)
+
+UNASSIGNED_LABEL = -1
 
 def setup_argparser():
     parser = ArgumentParser()
@@ -52,7 +54,7 @@ class Cluster:
         We measure the distance b/w all the points in self,
         and y (Euclidean distance), and then pick the smallest distance
         from those.
-        The two closest points b/w the two clusters represent the
+        The two closest points b/w the clusters represent the
         inter-cluster distance
         """
         dist = sys.maxsize
@@ -64,6 +66,9 @@ class Cluster:
     def combine(self, y: 'Cluster'):
         self.points.extend(y.points)
         return self
+
+    def has(self, p: 'Point'):
+        return p in self.points
 
 class MinQueue:
     def __init__(self, clusters: 'List[Cluster]'):
@@ -85,11 +90,7 @@ class MinQueue:
             q_map[cluster] = sorted_dist_pairs
         return q_map
 
-    def build_min_queue(self, clusters: 'List[Cluster]'):
-        self.q = self._build_min_queue(clusters)
-        return self.q
-
-    def show_min(self):
+    def peek_min(self):
         min_dist = sys.maxsize
         min_cluster_pair = (None, None)
         for cl, dist_pairs in self.q.items():
@@ -112,6 +113,8 @@ class MinQueue:
                 self.q[ocl] = sorted(o_dist_pairs, key=lambda x: x[1])
         # Combine both clusters
         x.combine(y)
+        # Compute the new inter-cluster distances, b/w the existing clusters,
+        # and the new cluster.
         new_dists = []
         for cl, dist_pairs in self.q.items():
             dist = cl.distance(x)
@@ -122,10 +125,15 @@ class MinQueue:
         self.q[x] = new_dists
         return new_dists
 
+    def get_clusters(self):
+        return list(self.q.keys())
+
 class AgglomerativeClustering:
     def __init__(self, num_clusters=3):
         self.num_clusters = num_clusters
         self.clusters = []
+        self.data = None
+        self.labels = None
         return
 
     def _build_initial_clusters(self, x: 'List[Point]'):
@@ -135,15 +143,26 @@ class AgglomerativeClustering:
         return clusters
 
     def fit(self, x):
+        self.data = x
+        self.labels = [UNASSIGNED_LABEL] * len(x)
         logging.info("Building initial clusters")
         self.clusters = self._build_initial_clusters(x)
         logging.info("Building min queue")
         minq = MinQueue(self.clusters)
         logging.info("Combining closest clusters using MIN distance technique..")
         while len(minq) > self.num_clusters:
-            x, y, dist = minq.show_min()
-            minq.combine(x, y)
-        print(minq.q)
+            c1, c2, dist = minq.peek_min()
+            minq.combine(c1, c2)
+        clusters = minq.get_clusters()
+        for idx, point in enumerate(x):
+            for cidx, cl in enumerate(clusters):
+                if cl.has(point):
+                    if self.labels[idx] == UNASSIGNED_LABEL:
+                        self.labels[idx] = cidx
+                    else:
+                        # Sound the alarm! A point is in two clusters!
+                        raise ValueError('Point {0} apparently belongs to both {1} and {2}'.format(point, clusters[self.labels[idx]], cl))
+        return self.labels
 
 def main():
     args = setup_argparser().parse_args()
@@ -152,10 +171,13 @@ def main():
     num_clusters = args.num_clusters
 
     data, truth_clusters = import_file(filepath, correct_clusters=False)
-    data = [Point(x) for x in data]
+    points = [Point(x) for x in data]
 
     aggclustering = AgglomerativeClustering(num_clusters=num_clusters)
-    aggclustering.fit(data)
+    labels = aggclustering.fit(points)
+    logging.info("Labels: {}".format(labels))
+
+    plot(reduce_dimensionality(data), labels, None, suffix="hierarchical")
     return
 
 if __name__ == "__main__":
