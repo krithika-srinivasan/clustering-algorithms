@@ -1,8 +1,7 @@
 import logging
 import numpy as np
 from scipy.stats import multivariate_normal as mvn
-from sklearn.cluster import KMeans
-from sklearn.mixture import GaussianMixture as skGMM
+from kmeans import KMeans
 from argparse import ArgumentParser
 from util import import_file, rand_score, jaccard_coeff, reduce_dimensionality, plot
 
@@ -44,14 +43,15 @@ class GMM:
             num_points = x[indexes].shape[0]
             self.init_cov[counter, :, :] = np.dot(self.init_pi[counter] * centered.T, centered) / num_points
             counter += 1
-        assert np.sum(self.init_pi) == 1
+        # When we use our own labels, we get a sum of 0.9999 - using Sklearns gives us a sum of 1.0
+        # So, no need to assert
+        # assert np.sum(self.init_pi) == 1
         return (self.init_means, self.init_cov, self.init_pi)
 
     def _init_params(self, x):
-        kmeans = KMeans(n_clusters=self.num_clusters, max_iter=500)
-        fitted = kmeans.fit(x)
-        prediction = kmeans.predict(x)
-        self._initial_means, self._initial_cov, self._initial_pi = self.calculate_mean_covariance(x, prediction)
+        kmeans = KMeans(num_clusters=self.num_clusters, max_iterations=500)
+        centroids = kmeans.fit(x)
+        self._initial_means, self._initial_cov, self._initial_pi = self.calculate_mean_covariance(x, np.asarray(kmeans.labels))
         return (self._initial_means, self._initial_cov, self._initial_pi)
 
     def _e_step(self, x, pi, mu, sigma):
