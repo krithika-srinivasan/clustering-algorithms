@@ -122,7 +122,7 @@ def main():
 
     logging.info(args)
 
-    data, truth_clusters = import_file(filepath)
+    data, truth_clusters = import_file(filepath, correct_clusters=True)
     # num_clusters = len(set(truth_clusters))
 
     kmeans = KMeans(num_clusters=num_clusters, tolerance=tolerance, max_iterations=max_iterations)

@@ -265,7 +265,7 @@ Figure 1 shows us the clusters computed by KMeans for each of the two data
 placement H
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Tabular
@@ -346,7 +346,7 @@ iyer.txt
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.479
+0.786
 \end_layout
 
 \end_inset
@@ -355,7 +355,7 @@ iyer.txt
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0093
+0.0174
 \end_layout
 
 \end_inset
@@ -390,7 +390,7 @@ KMeans clustering external index values
 \end_layout
 
 \begin_layout Standard
-Table 1 shows us the Rand Index, and Jaccard Coefficient values for the
+Table 1 shows us the Rand Index, and Jaccard coefficient values for the
  KMeans clusters generated for the two data sets.
 \end_layout
 
