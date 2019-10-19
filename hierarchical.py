@@ -39,7 +39,7 @@ class Point:
         return l2_distance(self.data, y.data)
 
 class Cluster:
-    def __init__(self, points):
+    def __init__(self, points: 'List[Point]'):
         self.points = points
         return
 
@@ -94,6 +94,8 @@ class MinQueue:
         min_dist = sys.maxsize
         min_cluster_pair = (None, None)
         for cl, dist_pairs in self.q.items():
+            # Cluster, distance pairs are ordered by distances,
+            # the first entry in each list is the cluster closest to the current
             min_cl, dist = dist_pairs[0]
             if dist <= min_dist:
                 min_dist = dist
@@ -102,7 +104,7 @@ class MinQueue:
 
     def combine(self, x: 'Cluster', y: 'Cluster'):
         if x not in self.q or y not in self.q:
-            raise ValueError('Either one of the two clusters are not in the MinQueue')
+            raise ValueError('Clusters to be combined are not in the MinQueue')
         # First remove both x and y from the MinQueue
         for cl in [x, y]:
             dist_pairs = self.q.pop(cl)
