@@ -181,7 +181,9 @@ def main():
     logging.info("Rand score: {}".format(rand_score(truth_clusters, labels)))
     logging.info("Jaccard coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
-    plot(reduce_dimensionality(data), labels, None, suffix="hierarchical")
+    # We apply PCA dim reduction to both data, and centroids to be able to plot them
+    plot(reduce_dimensionality(data), truth_clusters, None, suffix="hierarchical_truth")
+    plot(reduce_dimensionality(data), labels, None, suffix="hierarchical_computed")
     return
 
 if __name__ == "__main__":

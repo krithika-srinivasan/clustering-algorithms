@@ -1,7 +1,6 @@
 import math
 import logging
 import numpy as np
-# from sklearn.cluster import DBSCAN as SKDBSCAN
 from argparse import ArgumentParser
 from util import import_file, rand_score, jaccard_coeff, reduce_dimensionality, plot
 
@@ -143,14 +142,10 @@ def main():
 
     db = DBSCAN(eps=eps, min_points=min_pts)
     db.dbscan(data)
-    print(db.clusters)
-    print(db.labels)
-    # skdb = SKDBSCAN(eps=eps, min_samples=min_pts, algorithm="brute").fit(data)
-    print(np.unique(db.labels, return_counts=True))
-    # print(np.unique(skdb.labels_, return_counts=True))
     # There's barely any difference b/w what we classify and what Sklearns does - this looks correct
-    plot(reduce_dimensionality(data), db.labels, None, suffix="dbscan")
-    # plot(reduce_dimensionality(data), skdb.labels_, None, suffix="skdbscan")
+    # We apply PCA dim reduction to both data, and centroids to be able to plot them
+    plot(reduce_dimensionality(data), truth_clusters, None, suffix="dbscan_truth")
+    plot(reduce_dimensionality(data), db.labels, None, suffix="dbscan_computed")
     return
 
 if __name__ == "__main__":

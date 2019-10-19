@@ -156,7 +156,8 @@ def main():
     logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
     # We apply PCA dim reduction to both data, and centroids to be able to plot them
-    plot(reduce_dimensionality(data), labels, None, suffix="gmm")
+    plot(reduce_dimensionality(data), truth_clusters, None, suffix="gmm_truth")
+    plot(reduce_dimensionality(data), labels, None, suffix="gmm_computed")
     return
 
 if __name__ == "__main__":
