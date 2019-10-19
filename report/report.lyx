@@ -317,7 +317,7 @@ cho.txt
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.406
+0.791
 \end_layout
 
 \end_inset
@@ -392,6 +392,26 @@ KMeans clustering external index values
 \begin_layout Standard
 Table 1 shows us the Rand Index, and Jaccard coefficient values for the
  KMeans clusters generated for the two data sets.
+\end_layout
+
+\begin_layout Standard
+From the table, we can see that both the rand index, and jaccard coefficient
+ are higer for the `cho.txt' data set, indicating that that particular data
+ set is better classified by KMeans.
+ This is also corroborated by the the data set visualizations in Figure
+ 1, where the clusters for `iyer.txt' are mostly clumped together, away from
+ the actual data points.
+ A reason for this poor performance could be the fact that KMeans has a
+ tough time dealing with non-spherical clustered data, or data that has
+ varying cluster densities.
+ 
+\end_layout
+
+\begin_layout Standard
+The advantages of KMeans, on the other hand, are exhibited quite nicely
+ by its performance on `cho.txt', which seems to be clustered quite well,
+ owing to the fact that most of the clusters have similar density, and are
+ spherically shaped in 2 dimensions.
 \end_layout
 
 \end_body
