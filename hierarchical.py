@@ -170,7 +170,7 @@ def main():
     filepath = args.file
     num_clusters = args.num_clusters
 
-    data, truth_clusters = import_file(filepath, correct_clusters=False)
+    data, truth_clusters = import_file(filepath, correct_clusters=True)
     points = [Point(x) for x in data]
 
     aggclustering = AgglomerativeClustering(num_clusters=num_clusters)
