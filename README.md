@@ -12,6 +12,8 @@ The following packages are required to run them:
 3. Scikit-Learn
 4. Matplotlib
 
+When each of the 4 python implementations are run, they will also generate 2 image files, with a name like so `cluster_<algorithm>_computed.png` or `cluster_algorithm_truth.png`. These files are the computed, and actual ground truth cluster based (respectively), 2d cluster plots.
+
 You can use variations of the following commands to run each algorithm.
 
 KMeans
