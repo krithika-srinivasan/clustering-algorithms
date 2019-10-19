@@ -395,8 +395,8 @@ Table 1 shows us the Rand Index, and Jaccard coefficient values for the
 \end_layout
 
 \begin_layout Standard
-From the table, we can see that both the rand index, and jaccard coefficient
- are higer for the `cho.txt' data set, indicating that that particular data
+From the table, we can see that both the Rand index, and Jaccard coefficient
+ are higher for the `cho.txt' data set, indicating that that particular data
  set is better classified by KMeans.
  This is also corroborated by the the data set visualizations in Figure
  1, where the clusters for `iyer.txt' are mostly clumped together, away from
