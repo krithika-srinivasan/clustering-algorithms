@@ -39,8 +39,8 @@ new_clusters_cho <- spectral_clusters('Project_2/cho.txt', 5, 0.6)
 new_clusters_iyer <- spectral_clusters('Project_2/iyer.txt', 11, 0.6)
 
 #Get the data for the plots
-data_raw_cho <- read.csv('Project_2/cho.txt',header = FALSE, sep = '\t')
-data_raw_iyer <- read.csv('Project_2/iyer.txt',header = FALSE, sep = '\t')
+data_raw_cho <- read.csv('data/cho.txt',header = FALSE, sep = '\t')
+data_raw_iyer <- read.csv('data/iyer.txt',header = FALSE, sep = '\t')
 
 #Select only the numeric data
 data_num_cho <- data_raw_cho[3:ncol(data_raw_cho)]
