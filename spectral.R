@@ -4,28 +4,32 @@ library(Matrix)
 library(ggplot2)
 library(ggpubr)
 library(clusteval)
+library(fossil)
+
+cho_file_name <- 'data/cho.txt'
+iyer_file_name <- 'data/iyer.txt'
 
 spectral_clusters <- function(path, k, sigma){
   data_raw <- read.csv(path,header = FALSE, sep = '\t')
-  
+
   #Select only the numeric data
   data_num <- data_raw[3:ncol(data_raw)]
-  
+
   #Calculate distance matrix (W)
   data_dist <- gausskernel(data_num, sigma)
-  
+
   #Calculate degree matrix (D)
   data_degree <- rowSums(data_dist) - 1
   data_degree <- diag(data_degree)
-  
+
   #Laplacian matrix
   data_l <- sqrt(data_dist) %*% (data_degree - data_dist) %*% sqrt(data_dist)
-  
+
   #Eigen decompo
   data_l_eigen <- eigen(data_l)
   data_l_eigenvalues <- as.data.frame(data_l_eigen$values)
   data_l_eigenvectors <- as.data.frame(data_l_eigen$vectors)
-  
+
   starting_point <- ncol(data_l_eigenvectors) - k + 2
   #Pick the eigenvectors corresponding to the smallest eigenvalues
   data_newspace <- data_l_eigenvectors[starting_point : ncol(data_l_eigenvectors)]
@@ -35,12 +39,12 @@ spectral_clusters <- function(path, k, sigma){
 }
 
 #Get the clusters
-new_clusters_cho <- spectral_clusters('Project_2/cho.txt', 5, 0.6)
-new_clusters_iyer <- spectral_clusters('Project_2/iyer.txt', 11, 0.6)
+new_clusters_cho <- spectral_clusters(cho_file_name, 5, 0.6)
+new_clusters_iyer <- spectral_clusters(iyer_file_name, 11, 0.6)
 
 #Get the data for the plots
-data_raw_cho <- read.csv('data/cho.txt',header = FALSE, sep = '\t')
-data_raw_iyer <- read.csv('data/iyer.txt',header = FALSE, sep = '\t')
+data_raw_cho <- read.csv(cho_file_name,header = FALSE, sep = '\t')
+data_raw_iyer <- read.csv(iyer_file_name,header = FALSE, sep = '\t')
 
 #Select only the numeric data
 data_num_cho <- data_raw_cho[3:ncol(data_raw_cho)]
@@ -82,7 +86,7 @@ spectral_iyer <- ggplot(pca_org_comps_iyer, aes(x = PC1, y = PC2)) +
   ylab("Second component")
 
 ggarrange(org_cho, org_iyer, spectral_cho, spectral_iyer,
-          nrow = 2, ncol = 2, 
+          nrow = 2, ncol = 2,
           label.x = c('cho.txt', 'iyer.txt'),
           label.y = c('Original', 'Clustered'))
 
