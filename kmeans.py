@@ -102,7 +102,7 @@ class KMeans:
         if not self.centroids:
             raise ValueError("No data has been fit yet!")
         # Compute distances to all centroids
-        distances = [np.linalg.norm(self.l2_distance(point, centroid)) for centroid in self.centroids]
+        distances = [self.l2_distance(point, centroid) for centroid in self.centroids]
         # Assign to class that is closest
         klass = distances.index(min(distances))
         return klass
