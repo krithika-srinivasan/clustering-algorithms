@@ -147,7 +147,7 @@ def main():
     logging.info(args)
 
     data, truth_clusters = import_file(filepath)
-    num_clusters = len(set(truth_clusters))
+    # num_clusters = len(set(truth_clusters))
 
     gmm = GMM(num_clusters=num_clusters, max_iterations=max_iterations, tolerance=tolerance)
     gmm.fit(data)
