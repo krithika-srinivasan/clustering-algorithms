@@ -38,13 +38,6 @@ python dbscan.py --file ./data/cho.txt --min-points 3 --eps 1
 
 ## REMOVE EVERYTHING BELOW THIS LINE BEFORE SUBMITTING - INCLUDING THIS LINE
 ## TODO:
-1. Confirm if the algos implemented actually make sense
-
-
-### Algos done
-1. KMeans
-2. GMM
-3. DBSCAN
-4. Hierarchical - partially complete
-5. Spectral clustering
+1. Add provision to accept initial clusters for KMeans
+2. Add provision to accept pi, mu, sigma for GMM, output estimated parameters
 

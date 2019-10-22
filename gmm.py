@@ -127,15 +127,9 @@ class GMM:
                     logging.info("Iteration: {}, Loss: {}".format(run, loss))
         except Exception as e:
             print(e)
+        # Argmax along cluster axis gives us the labels
+        self.labels = self.gamma.argmax(1)
         return self
-
-    def predict(self, x):
-        x = np.asarray(x)
-        labels = np.zeros((x.shape[0], self.num_clusters))
-        for cluster in range(self.num_clusters):
-            labels[:, cluster] = self.pi[cluster] * mvn.pdf(x, self.mu[cluster, :], self.sigma[cluster])
-        labels =labels.argmax(1)
-        return labels
 
 def main():
     args = setup_argparser().parse_args()
@@ -151,7 +145,7 @@ def main():
 
     gmm = GMM(num_clusters=num_clusters, max_iterations=max_iterations, tolerance=tolerance)
     gmm.fit(data)
-    labels = gmm.predict(data)
+    labels = gmm.labels
     logging.info("Rand Index: {}".format(rand_score(truth_clusters, labels)))
     logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
