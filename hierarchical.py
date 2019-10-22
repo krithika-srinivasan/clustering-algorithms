@@ -78,6 +78,11 @@ class MinQueue:
         return len(self.q)
 
     def _build_min_queue(self, clusters: 'List[Cluster]'):
+        """
+        Build the MinQueue by calculating all the
+        inter-cluster distances, and storing them as an
+        adjacency list representation, sorted by distance.
+        """
         q_map = collections.defaultdict(list)
         for oc in clusters:
             for ic in clusters:
@@ -91,6 +96,9 @@ class MinQueue:
         return q_map
 
     def peek_min(self):
+        """
+        Return the two closest clusters currently in the MinQueue
+        """
         min_dist = sys.maxsize
         min_cluster_pair = (None, None)
         for cl, dist_pairs in self.q.items():
@@ -103,6 +111,12 @@ class MinQueue:
         return (*min_cluster_pair, min_dist)
 
     def combine(self, x: 'Cluster', y: 'Cluster'):
+        """
+        Remove both x and y from the MinQueue including
+        all inter-cluster distances, combine x and y into one,
+        and calculate the inter-cluster distances with this new
+        cluster
+        """
         if x not in self.q or y not in self.q:
             raise ValueError('Clusters to be combined are not in the MinQueue')
         # First remove both x and y from the MinQueue
@@ -139,12 +153,19 @@ class AgglomerativeClustering:
         return
 
     def _build_initial_clusters(self, x: 'List[Point]'):
+        """
+        Assign each point to its own cluster
+        """
         clusters = []
         for xp in x:
             clusters.append(Cluster([xp]))
         return clusters
 
     def fit(self, x):
+        """
+        Init the MinQueue, and keep combining the two closest
+        clusters until we get the required number of clusters.
+        """
         self.data = x
         self.labels = [UNASSIGNED_LABEL] * len(x)
         logging.info("Building initial clusters")

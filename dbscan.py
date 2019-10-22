@@ -70,6 +70,13 @@ class DBSCAN:
         return math.sqrt(dist)
 
     def expand_cluster(self, cluster, point, neighbours, neighbour_indexes):
+        """
+        Expand a cluster by including all neighbouring points that
+        are core points.
+        We do this by querying the neigbhourhood of each neighbour,
+        seeing if they're a core point, and adding them to the current
+        cluster, if they aren't already in some other cluster.
+        """
         indexes = []
         cluster.add_point(point)
         for pn_idx, pn in enumerate(neighbours):
@@ -94,6 +101,10 @@ class DBSCAN:
         return indexes
 
     def query_region(self, point):
+        """
+        Look for neighbours for a point,
+        within the eps radius.
+        """
         result = []
         indexes = []
         for didx, dpoint in enumerate(self.data):
@@ -104,9 +115,15 @@ class DBSCAN:
         return result, indexes
 
     def dbscan(self, data):
+        """
+        Init the Noise cluster first.
+        Any point that contains fewer than Min Points in its
+        eps radius, is a noise point; all other points are
+        expanded and included in clusters.
+        """
         self.reset_params()
         self.data = data
-        self.labels = [-1] * len(data)
+        self.labels = [NOISE_LABEL] * len(data)
 
         noise_cluster = Cluster('Noise')
         self.clusters.add(noise_cluster)
