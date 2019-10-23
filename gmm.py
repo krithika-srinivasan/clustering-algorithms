@@ -1,3 +1,4 @@
+import sys
 import logging
 import numpy as np
 from scipy.stats import multivariate_normal as mvn
@@ -78,7 +79,11 @@ class GMM:
         self.sigma = self.sigma if self._initial_cov is None else self._initial_cov
 
         for cluster in range(self.num_clusters):
-            self.gamma[:, cluster] = self.pi[cluster] * mvn.pdf(x, self.mu[cluster, :], self.sigma[cluster])
+            dist = mvn(self.mu[cluster, :], self.sigma[cluster], allow_singular=True)
+            # Using this line - some clusters are ignored. What gives?
+            self.gamma[:, cluster] = self.pi[cluster] * dist.pdf(x)
+            # TODO: If we use this line below, everything clusters into one cluster
+            # self.gamma[:, cluster] = self.pi[cluster] * mvn.pdf(x, self.mu[cluster, :], self.sigma[cluster])
 
         # Normalise gamma to give a probability
         gamma_norm = np.sum(self.gamma, axis=1)[:, np.newaxis]
@@ -164,6 +169,7 @@ def main():
     gmm = GMM(num_clusters=num_clusters, max_iterations=max_iterations, tolerance=tolerance)
     gmm.fit(data)
     labels = gmm.labels
+    # logging.info("Pi: {}, Mu: {}, Sigma: {}".format(gmm.pi, gmm.mu, gmm.sigma))
     logging.info("Rand Index: {}".format(rand_score(truth_clusters, labels)))
     logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
