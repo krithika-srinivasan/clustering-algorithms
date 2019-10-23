@@ -16,6 +16,7 @@ def setup_argparser():
     parser.add_argument("--random-start", help="Pick cluster centroids at random", action="store_true", default=False)
     parser.add_argument("--tolerance", help="Tolerance for centroid shifts", type=float, default=0.0001)
     parser.add_argument("--num-iterations", help="Max iterations to run the KMeans algorithm for", type=int, default=1000)
+    parser.add_argument("--centroids", type=int, nargs="+", help="Initial centroid indexes - if not provided, will use first n centroids", default=None)
     return parser
 
 def accuracy_score(predictions, actual):
@@ -48,18 +49,22 @@ class KMeans:
             dist += (x[idx] - y[idx]) ** 2
         return math.sqrt(dist)
 
-    def fit(self, x, random_start=False):
+    def fit(self, x, initial_centroids=None, random_start=False):
         """
         Fits data points using the KMeans method.
         Returns optimal centroids.
         """
         self._points = x
-        self.centroids = [None] * self.num_clusters
-        if random_start:
+        if initial_centroids:
+            self.centroids = []
+            for idx in initial_centroids:
+                self.centroids.append(x[idx])
+        elif random_start:
             # Select random centroids
             choices = random.sample(x, self.num_clusters)
             self.centroids = choices
         else:
+            self.centroids = [None] * self.num_clusters
             # Select first `num_clusters` data points as initial centroids
             for idx in range(self.num_clusters):
                 self.centroids[idx] = x[idx]
@@ -119,6 +124,10 @@ def main():
     random_start = args.random_start
     max_iterations = args.num_iterations
     tolerance = args.tolerance
+    initial_centroids = args.centroids
+
+    if len(initial_centroids) != num_clusters:
+        raise ValueError("Number of centroids provided does not match number of clusters")
 
     logging.info(args)
 
@@ -126,7 +135,7 @@ def main():
     # num_clusters = len(set(truth_clusters))
 
     kmeans = KMeans(num_clusters=num_clusters, tolerance=tolerance, max_iterations=max_iterations)
-    centroids = kmeans.fit(data, random_start=random_start)
+    centroids = kmeans.fit(data, initial_centroids=initial_centroids, random_start=random_start)
     score = kmeans.score(truth_clusters)
 
     logging.info("Centroids: {}".format(centroids))
