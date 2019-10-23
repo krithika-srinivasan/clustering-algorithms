@@ -23,10 +23,11 @@ class GMM:
         self.tolerance = tolerance
         return
 
-    def get_params(self):
-        return (self.mu, self.pi, self.sigma)
-
     def calculate_mean_covariance(self, x, prediction):
+        """
+        Calculate mean and cov for each cluster given to us
+        by the KMeans clustering
+        """
         x = np.asarray(x)
         dim = x.shape[1]
         labels = list(set(prediction))
@@ -37,7 +38,7 @@ class GMM:
         counter = 0
         for label in labels:
             indexes = np.where(prediction == label)
-            self.init_pi[counter] = len(indexes[0]) / len(x)
+            self.init_pi[counter] = len(indexes[0]) / x.shape[0]
             self.init_means[counter, :] = np.mean(x[indexes], axis=0)
             centered = x[indexes] - self.init_means[counter, :]
             num_points = x[indexes].shape[0]
@@ -49,12 +50,23 @@ class GMM:
         return (self.init_means, self.init_cov, self.init_pi)
 
     def _init_params(self, x):
+        """
+        Use KMeans to find starting values
+        """
         kmeans = KMeans(num_clusters=self.num_clusters, max_iterations=500)
         centroids = kmeans.fit(x)
         self._initial_means, self._initial_cov, self._initial_pi = self.calculate_mean_covariance(x, np.asarray(kmeans.labels))
         return (self._initial_means, self._initial_cov, self._initial_pi)
 
     def _e_step(self, x, pi, mu, sigma):
+        """
+        Perform Expectation step
+
+        x - Data points
+        pi - Weights of mixture components
+        mu - Means of mixture components
+        sigma: Covar matrices of mixture components
+        """
         x = np.asarray(x)
         N = x.shape[0]
         self.gamma = np.zeros((N, self.num_clusters))
@@ -68,32 +80,37 @@ class GMM:
         for cluster in range(self.num_clusters):
             self.gamma[:, cluster] = self.pi[cluster] * mvn.pdf(x, self.mu[cluster, :], self.sigma[cluster])
 
+        # Normalise gamma to give a probability
         gamma_norm = np.sum(self.gamma, axis=1)[:, np.newaxis]
         self.gamma /= gamma_norm
 
         return self.gamma
 
     def _m_step(self, x, gamma):
+        """
+        Perform Maximisation.
+        Need to update the priors, means, and covar matrix
+        """
         x = np.asarray(x)
-        N = x.shape[0]
+        N, dim = x.shape[0], x.shape[1]
         num_clusters = self.gamma.shape[1]
-        dim = x.shape[1]
 
         self.pi = np.mean(self.gamma, axis=0)
         self.mu = np.dot(self.gamma.T, x) / np.sum(self.gamma, axis=0)[:, np.newaxis]
 
         for cluster in range(num_clusters):
-            tmpx = x - self.mu[cluster, :]
+            x_centered = x - self.mu[cluster, :]
             gamma_diag = np.diag(self.gamma[:, cluster])
             gamma_diag = np.matrix(gamma_diag)
-            # TODO: Check if this is even being used?
-            x_mu = np.matrix(tmpx)
-            sigma_c = tmpx.T * gamma_diag * tmpx
+            sigma_c = x_centered.T * gamma_diag * x_centered
             self.sigma[cluster, :, :] = (sigma_c) / np.sum(self.gamma, axis=0)[:, np.newaxis][cluster]
 
         return self.pi, self.mu, self.sigma
 
     def _compute_loss_function(self, x, pi, mu, sigma):
+        """
+        Compute lower bound loss
+        """
         x = np.asarray(x)
         N = x.shape[0]
         num_clusters = self.gamma.shape[1]
@@ -102,6 +119,7 @@ class GMM:
         for cluster in range(num_clusters):
             dist = mvn(self.mu[cluster], self.sigma[cluster], allow_singular=True)
             self.loss[:, cluster] = self.gamma[:, cluster] * (np.log(self.pi[cluster] + 0.00001) + dist.logpdf(x) - np.log(self.gamma[:, cluster] + 0.000001))
+
         self.loss = np.sum(self.loss)
         return self.loss
 
