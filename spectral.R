@@ -33,7 +33,8 @@ spectral_clusters <- function(path, k, sigma){
   starting_point <- ncol(data_l_eigenvectors) - k + 2
   #Pick the eigenvectors corresponding to the smallest eigenvalues
   data_newspace <- data_l_eigenvectors[starting_point : ncol(data_l_eigenvectors)]
-  # data_newspace <- data_l_eigenvectors[1:k]
+  # centerk <- data_num_cho[3,]
+  # centerk[nrow(centerk) + 1] <- data_num_cho[6,]
   new_clusters <- kmeans(data_newspace, centers = k)
   return(new_clusters)
 }
@@ -62,7 +63,7 @@ org_cho <- ggplot(pca_org_comps_cho, aes(x = PC1, y = PC2)) +
   xlab("First component")+
   ylab("Second component")
 
-spectral_cho <- ggplot(pca_org_comps_cho, aes(x = PC1, y = PC2)) +
+spectral_cho <- ggplot(pca_org_comps_cho, aes(x = -PC1, y = -PC2)) +
   geom_point(aes(col = as.character(new_centroids)), size = 3)+
   labs(title = "Spectral clustering of cho.txt")+
   xlab("First component")+
@@ -79,7 +80,7 @@ org_iyer <- ggplot(pca_org_comps_iyer, aes(x = PC1, y = PC2)) +
   xlab("First component")+
   ylab("Second component")
 
-spectral_iyer <- ggplot(pca_org_comps_iyer, aes(x = PC1, y = PC2)) +
+spectral_iyer <- ggplot(pca_org_comps_iyer, aes(x = -PC1, y = -PC2)) +
   geom_point(aes(col = as.character(new_centroids)), size = 3)+
   labs(title = "Spectral clustering of iyer.txt")+
   xlab("First component")+
