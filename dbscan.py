@@ -159,6 +159,8 @@ def main():
 
     db = DBSCAN(eps=eps, min_points=min_pts)
     db.dbscan(data)
+    logging.info("Rand Index: {}".format(rand_score(truth_clusters, db.labels)))
+    logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, db.labels)))
     # There's barely any difference b/w what we classify and what Sklearns does - this looks correct
     # We apply PCA dim reduction to both data, and centroids to be able to plot them
     plot(reduce_dimensionality(data), truth_clusters, None, suffix="dbscan_truth")
