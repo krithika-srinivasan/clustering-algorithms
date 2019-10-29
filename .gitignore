@@ -3,3 +3,5 @@
 **/.idea/
 **/*.lyx#
 Rplots.pdf
+**/*.log
+**/*.aux
