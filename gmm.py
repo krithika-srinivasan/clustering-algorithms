@@ -79,7 +79,9 @@ class GMM:
         self.sigma = self.sigma if self._initial_cov is None else self._initial_cov
 
         for cluster in range(self.num_clusters):
-            dist = mvn(self.mu[cluster, :], self.sigma[cluster], allow_singular=True)
+            # Convert covar matrix from singular matrix to regular
+            self.sigma[cluster] = correct_singular_matrix(self.sigma[cluster])
+            dist = mvn(self.mu[cluster, :], self.sigma[cluster], allow_singular=False)
             # Using this line - some clusters are ignored. What gives?
             self.gamma[:, cluster] = self.pi[cluster] * dist.pdf(x)
             # TODO: If we use this line below, everything clusters into one cluster
@@ -122,7 +124,9 @@ class GMM:
         self.loss = np.zeros((N, num_clusters))
 
         for cluster in range(num_clusters):
-            dist = mvn(self.mu[cluster], self.sigma[cluster], allow_singular=True)
+            # Convert covar matrix from singular matrix to regular
+            self.sigma[cluster] = correct_singular_matrix(self.sigma[cluster])
+            dist = mvn(self.mu[cluster], self.sigma[cluster], allow_singular=False)
             self.loss[:, cluster] = self.gamma[:, cluster] * (np.log(self.pi[cluster] + 0.00001) + dist.logpdf(x) - np.log(self.gamma[:, cluster] + 0.000001))
 
         self.loss = np.sum(self.loss)
@@ -153,6 +157,14 @@ class GMM:
         # Argmax along cluster axis gives us the labels
         self.labels = self.gamma.argmax(1)
         return self
+
+def correct_singular_matrix(x, eps=1e-6):
+    x = np.asarray(x)
+    if np.linalg.cond(x) < 1 / sys.float_info.epsilon:
+        # Not a singular matrix
+        return x
+    # Add a small value along the diagonal
+    return x + (np.eye(x.shape[1]) * eps)
 
 def main():
     args = setup_argparser().parse_args()
