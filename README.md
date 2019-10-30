@@ -38,6 +38,7 @@ python dbscan.py --file ./data/cho.txt --min-points 3 --eps 1
 
 ### Spectral Clustering
 Spectral clustering is written in R, and the following packages are required:
+
 1. ggplot2
 2. matrix
 3. KRLS
@@ -49,8 +50,3 @@ You can run the script in RStudio, or by running the following command
 ```bash
 Rscript spectral.R
 ```
-
-## REMOVE EVERYTHING BELOW THIS LINE BEFORE SUBMITTING - INCLUDING THIS LINE
-## TODO:
-2. Add provision to accept pi, mu, sigma for GMM, output estimated parameters
-
