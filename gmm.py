@@ -132,10 +132,15 @@ class GMM:
         self.loss = np.sum(self.loss)
         return self.loss
 
-    def fit(self, x):
+    def fit(self, x, mu=None, sigma=None, pi=None):
         x = np.asarray(x)
         dim = x.shape[1]
-        self.mu, self.sigma, self.pi = self._init_params(x)
+        if not mu or not sigma or not pi:
+            logging.info("Either one of Mu, Sigma, or Pi not provided to fit with - calculating using KMeans..")
+            self.mu, self.sigma, self.pi = self._init_params(x)
+        else:
+            logging.info("Using user-provided Mu, Sigma, Pi values")
+            self.mu, self.sigma, self.pi = mu, sigma, pi
         last_loss = -1
         try:
             for run in range(self.max_iterations):
@@ -181,7 +186,7 @@ def main():
     gmm = GMM(num_clusters=num_clusters, max_iterations=max_iterations, tolerance=tolerance)
     gmm.fit(data)
     labels = gmm.labels
-    # logging.info("Pi: {}, Mu: {}, Sigma: {}".format(gmm.pi, gmm.mu, gmm.sigma))
+    logging.info("Final Pi: {}, Mu: {}, Sigma: {}".format(gmm.pi, gmm.mu, gmm.sigma))
     logging.info("Rand Index: {}".format(rand_score(truth_clusters, labels)))
     logging.info("Jaccard Coefficient: {}".format(jaccard_coeff(truth_clusters, labels)))
 
