@@ -219,15 +219,15 @@ the DBSCAN clusters generated for the two data sets.
 
 The outputs of the algorithm in Figure 3 and the external evaluations from
 Table 3 highlight the advantages and disadvantages of density-based clustering.
-An advantage of DBSCAN is that it intuits cluster shapes based on the distribution
+An advantage of DBSCAN is that it intuitively clusters into shapes based on the distribution
 of the points, meaning that we do not specify the number of clusters here. DBSCAN
 is useful for identifying irregular cluster shapes since the clustering is done
 based on the distribution of points.
 
-DBSCAN also has a good definition for outliers, meaning that their presense does not negatively
+DBSCAN also has a good definition for outliers, meaning that their presence does not negatively
 impact the output clusters. The algorithm shows a better performance on the Iyer data set
 and it is evident that this is because the data points in Iyer are more densely-packed
-in a consistent density than in the Cho data set, where different groups of points
+in a consistent fashion than in the Cho data set, where different groups of points
 have varying densities. This shows us that DBSCAN does not perform as well
 with varying densities.
 
@@ -238,7 +238,7 @@ layout of the points in the dataset.
 
 \subsection{Gaussian Mixture Models}
 Clustering using GMMs makes use of the concept of multimodal Gaussian distributions. The
-goal of this kind of clustering is to find the Maximum Likelihood Estimation (MLE) of a
+goal of this kind of clustering is to find the Maximum Likelihood Estimate (MLE) of a
 point belonging to a cluster. The steps to perform clustering with GMMs are as follows:
 
 \begin{enumerate}
@@ -304,7 +304,7 @@ Spectral clustering applies the concept of graph partitioning to clustering data
 following are the steps to perform graph partitioning:
 \begin{enumerate}
     \item Convert the input data into a fully-connected graph. The edge weights represent the similarity
-    of the pair of points, here calculated by the Gaussian kernel. This can be represented as an
+    of the pair of points, calculated here by the Gaussian kernel. This can be represented as an
     adjacency matrix $W$.
     \item Calculate the degree of each vertex in $W$ and represent this as a degree matrix $D$
     \item Using $W$ and $D$, the graph Laplacian $L$ is calculated. In the unnormalized form,
@@ -346,7 +346,7 @@ graph theory. This means that spectral clustering performs consistently well for
 data, as seen with its high Rand indices for both the input data sets.
 
 One point of consideration is that the metric used to establish similarity between points can affect the
-output, e.g. using K-nearest neighbours versus the Gaussian kernel can produce different results.
+output, e.g. using k-Nearest Neighbours versus the Gaussian kernel can produce different results.
 Even within the similarity measures, Spectral clustering is sensitive to parameters. In our
 implementation with the Gaussian kernel, changing the kernel bandwidth $\sigma$ can dramatically alter the
 cluster assignment and its quality.
