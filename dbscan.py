@@ -41,7 +41,8 @@ class Cluster:
     def __repr__(self):
         return "<Cluster name={0}, points={1}>".format(self.name, len(self.points))
 
-NOISE_LABEL = -1
+# Have to change Noise to Label 0 to avoid rand score throwing an error
+NOISE_LABEL = 0
 
 class DBSCAN:
     def __init__(self, eps, min_points):
