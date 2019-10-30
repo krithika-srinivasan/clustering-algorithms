@@ -126,7 +126,7 @@ def main():
     tolerance = args.tolerance
     initial_centroids = args.centroids
 
-    if len(initial_centroids) != num_clusters:
+    if initial_centroids and  len(initial_centroids) != num_clusters:
         raise ValueError("Number of centroids provided does not match number of clusters")
 
     logging.info(args)
