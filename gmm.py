@@ -184,6 +184,10 @@ def main():
     # num_clusters = len(set(truth_clusters))
 
     gmm = GMM(num_clusters=num_clusters, max_iterations=max_iterations, tolerance=tolerance)
+    mu = [[1, 1], [3.5, 5.3], [0, 4]]
+    pi = [0.1, 0.8, 0.1]
+    sigma = [[[1, 0.5], [0.5, 1]], [[1, 0], [0, 2]], [[0.5, 0], [0, 0.1]]]
+    # gmm.fit(data, mu=mu, sigma=sigma, pi=pi)
     gmm.fit(data)
     labels = gmm.labels
     logging.info("Final Pi: {}, Mu: {}, Sigma: {}".format(gmm.pi, gmm.mu, gmm.sigma))
